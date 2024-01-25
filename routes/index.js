@@ -26,11 +26,13 @@ var router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
+
   if (!req.user) { return res.render('home'); }
   next();
 }, fetchTodos, function(req, res, next) {
   res.locals.filter = null;
   res.render('index', { user: req.user });
+  
 });
 
 router.get('/active', fetchTodos, function(req, res, next) {
@@ -46,12 +48,17 @@ router.get('/completed', fetchTodos, function(req, res, next) {
 });
 
 router.post('/', function(req, res, next) {
+
   req.body.title = req.body.title.trim();
   next();
+
 }, function(req, res, next) {
+
   if (req.body.title !== '') { return next(); }
   return res.redirect('/' + (req.body.filter || ''));
+
 }, function(req, res, next) {
+
   db.run('INSERT INTO todos (owner_id, title, completed) VALUES (?, ?, ?)', [
     req.user.id,
     req.body.title,
@@ -60,6 +67,7 @@ router.post('/', function(req, res, next) {
     if (err) { return next(err); }
     return res.redirect('/' + (req.body.filter || ''));
   });
+
 });
 
 router.post('/:id(\\d+)', function(req, res, next) {
